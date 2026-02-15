@@ -16,3 +16,6 @@
 # 忽略指定的文件夹（例如 "media" 文件夹）
 media/
 *.pdf
+
+# local backend db
+data/*.db

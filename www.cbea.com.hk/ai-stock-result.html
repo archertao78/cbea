@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>分析结果</title>
+  <style>
+    body { margin: 0; font-family: "PingFang SC", "Microsoft Yahei", sans-serif; background: #f5f8fe; color: #12254a; }
+    .wrap { max-width: 900px; margin: 26px auto; padding: 0 16px; }
+    .card { background: #fff; border: 1px solid #d7e2f4; border-radius: 16px; padding: 20px; }
+    .meta { color: #5c6a85; font-size: 13px; margin-bottom: 16px; }
+    .analysis { white-space: pre-wrap; line-height: 1.7; }
+    .error { color: #c62828; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 id="title">分析结果</h1>
+      <div id="meta" class="meta"></div>
+      <div id="analysis" class="analysis"></div>
+    </div>
+  </div>
+
+  <script>
+    const titleEl = document.getElementById('title');
+    const metaEl = document.getElementById('meta');
+    const analysisEl = document.getElementById('analysis');
+
+    init();
+
+    async function init() {
+      const id = new URLSearchParams(window.location.search).get('id');
+      if (!id) {
+        showError('缺少结果 ID。');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/analyses/${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+
+        titleEl.textContent = `${data.stock_name} (${data.stock_code}) 分析结果`;
+        metaEl.textContent = `生成时间：${new Date(data.created_at).toLocaleString()}`;
+        analysisEl.textContent = data.analysis_text || '';
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    function showError(message) {
+      metaEl.textContent = '';
+      analysisEl.innerHTML = `<span class="error">${message}</span>`;
+    }
+  </script>
+</body>
+</html>
